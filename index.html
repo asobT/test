@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Волшебные Пони</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- Главное меню -->
+  <section id="menu" class="screen active">
+    <div class="stars"></div>
+    <div class="menu-hero">
+      <img class="hero-img" alt=""
+           src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f984.svg"
+           onerror="this.style.display='none'">
+      <h1 class="title">Волшебные<br>Пони</h1>
+    </div>
+    <p class="subtitle">Игра для маленьких друзей пони</p>
+    <div class="menu-buttons">
+      <button class="big-btn pink" data-go="care">
+        <img class="btn-img" alt="" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f984.svg" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'icon',textContent:'🦄'}))">
+        <span>Ухаживать за пони</span>
+      </button>
+      <button class="big-btn purple" data-go="color">
+        <img class="btn-img" alt="" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3a8.svg" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'icon',textContent:'🎨'}))">
+        <span>Раскраска</span>
+      </button>
+      <button class="big-btn blue" data-go="arcade">
+        <img class="btn-img" alt="" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2b50.svg" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'icon',textContent:'⭐'}))">
+        <span>Собирай звёздочки</span>
+      </button>
+      <button class="big-btn yellow" data-go="manners">
+        <img class="btn-img" alt="" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f496.svg" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'icon',textContent:'💖'}))">
+        <span>Уроки доброты</span>
+      </button>
+    </div>
+    <div class="badges" id="menuBadges"></div>
+  </section>
+
+  <!-- Уход за пони -->
+  <section id="care" class="screen">
+    <button class="back-btn" data-go="menu">⬅</button>
+    <h2 class="screen-title">Моя пони <span id="ponyName">Искорка</span></h2>
+
+    <div class="pony-stage" id="ponyStage">
+      <div class="hearts" id="hearts"></div>
+      <div class="bubbles" id="bubbles"></div>
+      <svg id="ponySVG" viewBox="0 0 400 320" class="pony-svg"></svg>
+      <div class="emote" id="emote"></div>
+    </div>
+
+    <div class="meters">
+      <div class="meter">
+        <span class="meter-label">🍎 Сытость</span>
+        <div class="meter-bar"><div class="meter-fill orange" id="meterFood"></div></div>
+      </div>
+      <div class="meter">
+        <span class="meter-label">🛁 Чистота</span>
+        <div class="meter-bar"><div class="meter-fill blue" id="meterClean"></div></div>
+      </div>
+      <div class="meter">
+        <span class="meter-label">😴 Бодрость</span>
+        <div class="meter-bar"><div class="meter-fill purple" id="meterSleep"></div></div>
+      </div>
+      <div class="meter">
+        <span class="meter-label">💖 Радость</span>
+        <div class="meter-bar"><div class="meter-fill pink" id="meterHappy"></div></div>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <button class="action-btn" data-action="feed"><span class="icon">🍎</span>Покормить</button>
+      <button class="action-btn" data-action="wash"><span class="icon">🧼</span>Искупать</button>
+      <button class="action-btn" data-action="brush"><span class="icon">🪮</span>Причесать</button>
+      <button class="action-btn" data-action="play"><span class="icon">🎈</span>Поиграть</button>
+      <button class="action-btn" data-action="sleep"><span class="icon">🌙</span>Уложить</button>
+      <button class="action-btn" data-action="hug"><span class="icon">🤗</span>Обнять</button>
+    </div>
+  </section>
+
+  <!-- Раскраска -->
+  <section id="color" class="screen">
+    <button class="back-btn" data-go="menu">⬅</button>
+    <h2 class="screen-title">Раскрась пони</h2>
+
+    <div class="color-palette" id="palette"></div>
+
+    <div class="coloring-stage">
+      <svg id="colorSVG" viewBox="0 0 400 360" class="color-svg"></svg>
+    </div>
+
+    <div class="color-tools">
+      <button class="tool-btn" id="resetColor">🔄 Заново</button>
+      <button class="tool-btn" id="randomColor">✨ Случайно</button>
+    </div>
+  </section>
+
+  <!-- Выбор аркады -->
+  <section id="arcade" class="screen">
+    <button class="back-btn" data-go="menu">⬅</button>
+    <h2 class="screen-title">Выбери игру</h2>
+    <div class="arcade-cards">
+      <button class="arcade-card pink" data-go="arcCatch">
+        <img class="card-img" alt="" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2b50.svg">
+        <div class="card-text">
+          <h3>Лови звёздочки</h3>
+          <p>Собирай падающие звёздочки и яблочки</p>
+          <span class="best">Лучший: <b id="bestCatch">0</b></span>
+        </div>
+      </button>
+      <button class="arcade-card blue" data-go="arcRun">
+        <img class="card-img" alt="" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f308.svg">
+        <div class="card-text">
+          <h3>Скачи по радуге</h3>
+          <p>Прыгай через камушки</p>
+          <span class="best">Лучший: <b id="bestRun">0</b></span>
+        </div>
+      </button>
+      <button class="arcade-card purple" data-go="arcMemory">
+        <img class="card-img" alt="" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e0.svg">
+        <div class="card-text">
+          <h3>Найди пару</h3>
+          <p>Запомни и найди одинаковых пони</p>
+          <span class="best">Лучший: <b id="bestMemory">∞</b></span>
+        </div>
+      </button>
+    </div>
+  </section>
+
+  <!-- Аркада 1: лови звёздочки -->
+  <section id="arcCatch" class="screen">
+    <button class="back-btn" data-go="arcade">⬅</button>
+    <div class="arcade-hud">
+      <div class="hud-item">⭐ <span id="arcScore">0</span></div>
+      <div class="hud-item">💖 <span id="arcLives">3</span></div>
+      <div class="hud-item">🏆 <span id="arcBest">0</span></div>
+    </div>
+    <canvas id="arcadeCanvas" width="400" height="560"></canvas>
+    <div class="arcade-controls">
+      <button class="dpad" id="leftBtn">◀</button>
+      <button class="dpad" id="rightBtn">▶</button>
+    </div>
+    <div class="arcade-overlay" id="arcadeOverlay">
+      <div class="overlay-card">
+        <h3 id="overlayTitle">Лови звёздочки!</h3>
+        <p id="overlayText">Двигай пони и собирай звёзды и яблочки. Тучек не бойся — они просто щекочут!</p>
+        <button class="big-btn pink" id="startArcade">Начать!</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Аркада 2: скачи по радуге (раннер) -->
+  <section id="arcRun" class="screen">
+    <button class="back-btn" data-go="arcade">⬅</button>
+    <div class="arcade-hud">
+      <div class="hud-item">🌟 <span id="runScore">0</span></div>
+      <div class="hud-item">💖 <span id="runLives">3</span></div>
+      <div class="hud-item">🏆 <span id="runBest">0</span></div>
+    </div>
+    <canvas id="runCanvas" width="500" height="320"></canvas>
+    <div class="arcade-controls">
+      <button class="dpad big" id="jumpBtn">🦘 Прыг!</button>
+    </div>
+    <div class="arcade-overlay" id="runOverlay">
+      <div class="overlay-card">
+        <h3 id="runTitle">Скачи по радуге!</h3>
+        <p id="runText">Нажимай «Прыг!», чтобы перепрыгивать камушки. Лови звёздочки в воздухе!</p>
+        <button class="big-btn blue" id="startRun">Начать!</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Аркада 3: найди пару -->
+  <section id="arcMemory" class="screen">
+    <button class="back-btn" data-go="arcade">⬅</button>
+    <div class="arcade-hud">
+      <div class="hud-item">🔄 Ходов: <span id="memMoves">0</span></div>
+      <div class="hud-item">💖 Найдено: <span id="memFound">0</span></div>
+      <div class="hud-item">🏆 <span id="memBest">∞</span></div>
+    </div>
+    <div class="memory-grid" id="memoryGrid"></div>
+    <div class="arcade-overlay" id="memoryOverlay">
+      <div class="overlay-card">
+        <h3 id="memTitle">Найди пару!</h3>
+        <p id="memText">Открывай карточки и находи одинаковых пони. Постарайся за меньшее число ходов!</p>
+        <button class="big-btn purple" id="startMemory">Начать!</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Уроки доброты -->
+  <section id="manners" class="screen">
+    <button class="back-btn" data-go="menu">⬅</button>
+    <h2 class="screen-title">Уроки доброты</h2>
+    <div class="manners-stage">
+      <div class="situation-card" id="situationCard">
+        <div class="situation-emoji" id="situationEmoji">🦄</div>
+        <p class="situation-text" id="situationText">Что нужно сказать?</p>
+        <div class="situation-choices" id="situationChoices"></div>
+      </div>
+      <div class="manners-feedback" id="mannersFeedback"></div>
+    </div>
+  </section>
+
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>
