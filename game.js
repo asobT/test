@@ -61,6 +61,32 @@ const PONIES = [
     eye: '#3b8fd1',
     horn: true, wings: false,
     cutie: 'gem'
+  },
+  {
+    id: 'sunny',
+    name: 'Лучик',
+    trait: 'весёлая',
+    body: '#ffd9a8',
+    bodyStroke: '#c47628',
+    mane: '#ff8a40',
+    maneAccent: '#ffe066',
+    tail: '#ff8a40',
+    eye: '#9a5a00',
+    horn: false, wings: false,
+    cutie: 'sun'
+  },
+  {
+    id: 'midnight',
+    name: 'Полночь',
+    trait: 'мечтательная',
+    body: '#cdb8ff',
+    bodyStroke: '#3a2570',
+    mane: '#3a2570',
+    maneAccent: '#9ad9ff',
+    tail: '#3a2570',
+    eye: '#5d3fb3',
+    horn: true, wings: true,
+    cutie: 'moon'
   }
 ];
 const ponyById = (id) => PONIES.find(p => p.id === id) || PONIES[0];
@@ -93,6 +119,28 @@ const CUTIE_MARKS = {
             fill="#9ad9ff" stroke="#3b8fd1" stroke-width="1.5"/>
       <path d="M-10 -4 l10 14 l-5 -22 z" fill="#cfeaff"/>
       <path d="M10 -4 l-10 14 l5 -22 z" fill="#fff" opacity=".5"/>
+    </g>`,
+  sun: (x, y) => `
+    <g transform="translate(${x},${y})">
+      <circle cx="0" cy="0" r="7" fill="#ffce4d" stroke="#c89b00" stroke-width="1.5"/>
+      <g stroke="#c89b00" stroke-width="2" stroke-linecap="round">
+        <line x1="0" y1="-12" x2="0" y2="-16"/>
+        <line x1="0" y1="12" x2="0" y2="16"/>
+        <line x1="-12" y1="0" x2="-16" y2="0"/>
+        <line x1="12" y1="0" x2="16" y2="0"/>
+        <line x1="-9" y1="-9" x2="-12" y2="-12"/>
+        <line x1="9" y1="-9" x2="12" y2="-12"/>
+        <line x1="-9" y1="9" x2="-12" y2="12"/>
+        <line x1="9" y1="9" x2="12" y2="12"/>
+      </g>
+    </g>`,
+  moon: (x, y) => `
+    <g transform="translate(${x},${y})">
+      <path d="M-2 -10 a 12 12 0 1 0 0 20 a 9 9 0 1 1 0 -20 z"
+            fill="#cfeaff" stroke="#3a2570" stroke-width="1.5"/>
+      <circle cx="8" cy="-10" r="1.5" fill="#fff"/>
+      <circle cx="12" cy="-2" r="1.5" fill="#fff"/>
+      <circle cx="9" cy="8" r="1.5" fill="#fff"/>
     </g>`
 };
 
@@ -182,22 +230,36 @@ function updateMenuBadges() {
 
 // ---------- SVG пони ----------
 // Большой SVG-маркап пони: используется на экране ухода и при выборе пони.
-// state может содержать happy/clean/sleep/food (для эмоций) и флаги washing/sleeping.
+// state может содержать happy/clean/sleep/food (для эмоций) и флаги washing/sleeping/animated.
 function ponySVGMarkup(p, state = {}) {
   const happy = (state.happy ?? 80) > 60;
   const dirty = (state.clean ?? 80) < 40;
   const tired = (state.sleep ?? 80) < 30 || state.sleeping;
   const sad = (state.happy ?? 80) < 30 || (state.food ?? 80) < 30;
+  const anim = state.animated !== false;
+  // Анимации — SMIL <animate>. Если выключено или пони спит — не вешаем.
+  const blink = (anim && !tired)
+    ? '<animate attributeName="ry" values="11;11;1;11" keyTimes="0;0.92;0.96;1" dur="4s" repeatCount="indefinite"/>'
+    : '';
+  const tailSway = anim
+    ? '<animateTransform attributeName="transform" type="rotate" from="-6 90 220" to="6 90 220" dur="2.4s" repeatCount="indefinite" calcMode="spline" keySplines="0.5 0 0.5 1; 0.5 0 0.5 1" values="-6 90 220;6 90 220;-6 90 220" keyTimes="0;0.5;1"/>'
+    : '';
+  const maneSway = anim
+    ? '<animateTransform attributeName="transform" type="rotate" from="-2 290 110" to="2 290 110" dur="3s" repeatCount="indefinite" values="-2 290 110;2 290 110;-2 290 110" keyTimes="0;0.5;1"/>'
+    : '';
+  const wingFlap = (anim && p.wings)
+    ? '<animateTransform attributeName="transform" type="scale" values="1 1; 1 0.85; 1 1" dur="0.7s" repeatCount="indefinite" additive="sum"/>'
+    : '';
 
   const eyeY = 150;
   const eyes = tired
     ? `<path d="M285 ${eyeY} q8 0 16 0" stroke="#2a1845" stroke-width="3.5" fill="none" stroke-linecap="round"/>
        <path d="M315 ${eyeY} q8 0 16 0" stroke="#2a1845" stroke-width="3.5" fill="none" stroke-linecap="round"/>`
     : `
-      <ellipse cx="293" cy="${eyeY}" rx="7" ry="11" fill="#fff" stroke="#2a1845" stroke-width="2"/>
-      <ellipse cx="323" cy="${eyeY}" rx="7" ry="11" fill="#fff" stroke="#2a1845" stroke-width="2"/>
-      <ellipse cx="293" cy="${eyeY + 2}" rx="5" ry="8" fill="${p.eye}"/>
-      <ellipse cx="323" cy="${eyeY + 2}" rx="5" ry="8" fill="${p.eye}"/>
+      <ellipse cx="293" cy="${eyeY}" rx="7" ry="11" fill="#fff" stroke="#2a1845" stroke-width="2">${blink}</ellipse>
+      <ellipse cx="323" cy="${eyeY}" rx="7" ry="11" fill="#fff" stroke="#2a1845" stroke-width="2">${blink}</ellipse>
+      <ellipse cx="293" cy="${eyeY + 2}" rx="5" ry="8" fill="${p.eye}">${blink}</ellipse>
+      <ellipse cx="323" cy="${eyeY + 2}" rx="5" ry="8" fill="${p.eye}">${blink}</ellipse>
       <ellipse cx="294" cy="${eyeY - 3}" rx="2" ry="3" fill="#fff"/>
       <ellipse cx="324" cy="${eyeY - 3}" rx="2" ry="3" fill="#fff"/>
       <!-- Ресницы -->
@@ -219,30 +281,40 @@ function ponySVGMarkup(p, state = {}) {
     ? '<path d="M289 165 q-2 10 0 18 q4 -8 0 -18" fill="#6ec3ff"/>'
     : '';
 
-  // Грива — двухцветные пряди
+  // Грива — двухцветные пряди (с лёгким покачиванием)
   const mane = `
-    <path d="M255 110 q0 -30 25 -45 q-5 25 5 35 q15 -25 35 -25 q-5 25 10 30 q15 -10 30 -5 q-10 25 -25 30 z"
-          fill="${p.mane}" stroke="${p.bodyStroke}" stroke-width="2"/>
-    <path d="M270 100 q5 -15 18 -22 q-2 15 5 22 z" fill="${p.maneAccent}" opacity=".85"/>
-    <path d="M310 80 q5 -10 18 -10 q-3 12 0 20 z" fill="${p.maneAccent}" opacity=".85"/>
+    <g>
+      ${maneSway}
+      <path d="M255 110 q0 -30 25 -45 q-5 25 5 35 q15 -25 35 -25 q-5 25 10 30 q15 -10 30 -5 q-10 25 -25 30 z"
+            fill="${p.mane}" stroke="${p.bodyStroke}" stroke-width="2"/>
+      <path d="M270 100 q5 -15 18 -22 q-2 15 5 22 z" fill="${p.maneAccent}" opacity=".85"/>
+      <path d="M310 80 q5 -10 18 -10 q-3 12 0 20 z" fill="${p.maneAccent}" opacity=".85"/>
+    </g>
     <!-- Чёлка -->
     <path d="M260 130 q15 -15 35 -10 q-10 12 -8 25 z" fill="${p.mane}" stroke="${p.bodyStroke}" stroke-width="1.5"/>
   `;
-  // Хвост — два слоя
+  // Хвост — два слоя, покачивается
   const tailMarkup = `
-    <path d="M85 230 q-30 -20 -25 -65 q15 35 40 55 z" fill="${p.tail}" stroke="${p.bodyStroke}" stroke-width="2"/>
-    <path d="M85 245 q-35 5 -30 35 q22 -10 38 -22 z" fill="${p.maneAccent}" stroke="${p.bodyStroke}" stroke-width="2"/>
+    <g>
+      ${tailSway}
+      <path d="M85 230 q-30 -20 -25 -65 q15 35 40 55 z" fill="${p.tail}" stroke="${p.bodyStroke}" stroke-width="2"/>
+      <path d="M85 245 q-35 5 -30 35 q22 -10 38 -22 z" fill="${p.maneAccent}" stroke="${p.bodyStroke}" stroke-width="2"/>
+    </g>
   `;
   // Рог
   const horn = p.horn ? `
     <path d="M278 80 l6 -38 l6 38 z" fill="${p.maneAccent}" stroke="${p.bodyStroke}" stroke-width="2"/>
     <path d="M281 65 l3 0 M281 55 l3 0" stroke="${p.bodyStroke}" stroke-width="1.5"/>
   ` : '';
-  // Крыло
+  // Крыло (хлопает у пегасов)
   const wing = p.wings ? `
-    <path d="M180 235 q-30 -10 -55 0 q-5 25 15 35 q20 -8 40 -8 z"
-          fill="${p.maneAccent}" stroke="${p.bodyStroke}" stroke-width="2"/>
-    <path d="M150 248 l30 0 M150 256 l25 0" stroke="${p.bodyStroke}" stroke-width="1.5" fill="none"/>
+    <g transform="translate(155 250)">
+      ${wingFlap}
+      <path d="M25 -15 q-30 -10 -55 0 q-5 25 15 35 q20 -8 40 -8 z"
+            fill="${p.maneAccent}" stroke="${p.bodyStroke}" stroke-width="2"
+            transform="translate(0 0)"/>
+      <path d="M-5 -2 l30 0 M-5 6 l25 0" stroke="${p.bodyStroke}" stroke-width="1.5" fill="none"/>
+    </g>
   ` : '';
 
   const cutieMark = (CUTIE_MARKS[p.cutie] || (() => ''))(195, 250);
@@ -315,6 +387,27 @@ function renderPony() {
   $('meterClean').style.width = save.pony.clean + '%';
   $('meterSleep').style.width = save.pony.sleep + '%';
   $('meterHappy').style.width = save.pony.happy + '%';
+  renderSparkles(save.pony.happy > 70);
+}
+
+function renderSparkles(on) {
+  const layer = $('sparkles');
+  if (!layer) return;
+  layer.innerHTML = '';
+  if (!on) return;
+  const positions = [
+    { x: 12, y: 30 }, { x: 86, y: 22 }, { x: 18, y: 70 },
+    { x: 90, y: 60 }, { x: 50, y: 18 }
+  ];
+  positions.forEach((pos, i) => {
+    const s = document.createElement('div');
+    s.className = 'sparkle';
+    s.textContent = i % 2 ? '✨' : '⭐';
+    s.style.left = pos.x + '%';
+    s.style.top = pos.y + '%';
+    s.style.animationDelay = (i * 0.4) + 's';
+    layer.appendChild(s);
+  });
 }
 
 // ---------- Экран выбора пони ----------
@@ -1080,14 +1173,14 @@ function endRun() {
 }
 
 // === Аркада 3: Найди пару ===
-// 8 пар: 4 пони из каталога + 4 символа
-const memoryPonies = [
+const allMemoryItems = [
   ...PONIES.map(p => ({ name: p.id, kind: 'pony', pony: p })),
   { name: 'rainbow', kind: 'emoji', emoji: '1f308' },
   { name: 'star', kind: 'emoji', emoji: '2b50' },
   { name: 'apple', kind: 'emoji', emoji: '1f34e' },
   { name: 'heart', kind: 'emoji', emoji: '1f496' }
 ];
+const MEMORY_PAIRS = 8;
 const memory = {
   cards: [],
   flipped: [],
@@ -1118,9 +1211,10 @@ function startMemory() {
   $('memFound').textContent = 0;
   $('memoryOverlay').classList.add('hidden');
 
-  // 8 пар = 16 карт = 4х4
+  // 8 пар = 16 карт = 4х4 (выбираем случайные 8 из всех)
+  const pool = [...allMemoryItems].sort(() => Math.random() - 0.5).slice(0, MEMORY_PAIRS);
   const deck = [];
-  memoryPonies.forEach(p => { deck.push(p); deck.push(p); });
+  pool.forEach(p => { deck.push(p); deck.push(p); });
   // Перемешиваем
   for (let i = deck.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -1172,7 +1266,7 @@ function onMemoryClick(card) {
         memory.matched++;
         $('memFound').textContent = memory.matched;
         memory.busy = false;
-        if (memory.matched === memoryPonies.length) endMemory();
+        if (memory.matched === MEMORY_PAIRS) endMemory();
       }, 500);
     } else {
       memory.busy = true;
