@@ -58,10 +58,99 @@
     <h2 class="screen-title">Моя пони <span id="ponyName">Искорка</span></h2>
 
     <div class="pony-stage" id="ponyStage">
+      <div class="scene-bg" aria-hidden="true">
+        <svg viewBox="0 0 400 320" class="scene-svg" preserveAspectRatio="xMidYMax slice">
+          <defs>
+            <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#cfeaff"/>
+              <stop offset="60%" stop-color="#ffe6f9"/>
+              <stop offset="100%" stop-color="#a8e6b1"/>
+            </linearGradient>
+            <linearGradient id="rainbow" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ff6e6e"/>
+              <stop offset="20%" stop-color="#ffce4d"/>
+              <stop offset="40%" stop-color="#ffe28a"/>
+              <stop offset="60%" stop-color="#6ed47a"/>
+              <stop offset="80%" stop-color="#6ec3ff"/>
+              <stop offset="100%" stop-color="#b07cff"/>
+            </linearGradient>
+          </defs>
+          <rect width="400" height="320" fill="url(#skyGrad)"/>
+          <!-- Радуга на заднем плане -->
+          <path d="M-20 320 a 220 220 0 0 1 440 0" fill="none" stroke="url(#rainbow)" stroke-width="14" opacity=".55"/>
+          <!-- Солнышко -->
+          <g transform="translate(60 60)">
+            <circle r="20" fill="#ffce4d"/>
+            <g stroke="#ffce4d" stroke-width="3" stroke-linecap="round">
+              <line x1="0" y1="-30" x2="0" y2="-38"/>
+              <line x1="0" y1="30" x2="0" y2="38"/>
+              <line x1="-30" y1="0" x2="-38" y2="0"/>
+              <line x1="30" y1="0" x2="38" y2="0"/>
+              <line x1="-22" y1="-22" x2="-28" y2="-28"/>
+              <line x1="22" y1="-22" x2="28" y2="-28"/>
+              <line x1="-22" y1="22" x2="-28" y2="28"/>
+              <line x1="22" y1="22" x2="28" y2="28"/>
+              <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="60s" repeatCount="indefinite"/>
+            </g>
+            <circle r="20" fill="#ffe066"/>
+          </g>
+          <!-- Облака -->
+          <g fill="#fff" opacity=".85">
+            <g>
+              <ellipse cx="320" cy="60" rx="22" ry="12"/>
+              <ellipse cx="335" cy="55" rx="14" ry="10"/>
+              <ellipse cx="305" cy="55" rx="14" ry="10"/>
+              <animateTransform attributeName="transform" type="translate" values="0 0; 30 0; 0 0" dur="14s" repeatCount="indefinite"/>
+            </g>
+            <g>
+              <ellipse cx="180" cy="40" rx="18" ry="10"/>
+              <ellipse cx="195" cy="35" rx="11" ry="8"/>
+              <ellipse cx="170" cy="35" rx="11" ry="8"/>
+              <animateTransform attributeName="transform" type="translate" values="0 0; -25 0; 0 0" dur="20s" repeatCount="indefinite"/>
+            </g>
+          </g>
+          <!-- Цветочки на земле -->
+          <g>
+            <g transform="translate(40 290)">
+              <circle r="4" fill="#ff9ad6"/>
+              <circle cx="-4" cy="-3" r="3" fill="#ff6ec7"/>
+              <circle cx="4" cy="-3" r="3" fill="#ff6ec7"/>
+              <circle cx="-4" cy="3" r="3" fill="#ff6ec7"/>
+              <circle cx="4" cy="3" r="3" fill="#ff6ec7"/>
+              <circle r="2" fill="#ffce4d"/>
+            </g>
+            <g transform="translate(370 295)">
+              <circle r="4" fill="#d9a7ff"/>
+              <circle cx="-4" cy="-3" r="3" fill="#b07cff"/>
+              <circle cx="4" cy="-3" r="3" fill="#b07cff"/>
+              <circle cx="-4" cy="3" r="3" fill="#b07cff"/>
+              <circle cx="4" cy="3" r="3" fill="#b07cff"/>
+              <circle r="2" fill="#ffce4d"/>
+            </g>
+            <g transform="translate(110 305)">
+              <circle r="3" fill="#fff"/>
+              <circle cx="-3" cy="-2" r="2.5" fill="#fff"/>
+              <circle cx="3" cy="-2" r="2.5" fill="#fff"/>
+              <circle cx="-3" cy="2" r="2.5" fill="#fff"/>
+              <circle cx="3" cy="2" r="2.5" fill="#fff"/>
+              <circle r="1.5" fill="#ffce4d"/>
+            </g>
+          </g>
+          <!-- Травинки -->
+          <g stroke="#6ed47a" stroke-width="2" fill="none" stroke-linecap="round">
+            <path d="M70 305 q2 -8 0 -14"/>
+            <path d="M76 305 q-2 -6 0 -10"/>
+            <path d="M340 308 q2 -10 0 -16"/>
+            <path d="M346 308 q-2 -7 0 -12"/>
+            <path d="M210 312 q3 -8 0 -12"/>
+          </g>
+        </svg>
+      </div>
       <div class="hearts" id="hearts"></div>
       <div class="bubbles" id="bubbles"></div>
       <svg id="ponySVG" viewBox="0 0 400 320" class="pony-svg"></svg>
       <div class="emote" id="emote"></div>
+      <div class="sparkles" id="sparkles" aria-hidden="true"></div>
     </div>
 
     <div class="meters">
