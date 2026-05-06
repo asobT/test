@@ -36,8 +36,20 @@
         <img class="btn-img" alt="" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f496.svg" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'icon',textContent:'💖'}))">
         <span>Уроки доброты</span>
       </button>
+      <button class="small-btn" data-go="choose">
+        <span class="icon">✨</span>
+        <span>Выбрать пони</span>
+      </button>
     </div>
     <div class="badges" id="menuBadges"></div>
+  </section>
+
+  <!-- Выбор пони -->
+  <section id="choose" class="screen">
+    <button class="back-btn" data-go="menu">⬅</button>
+    <h2 class="screen-title">Выбери свою пони</h2>
+    <p class="subtitle small">Будем играть и заботиться о ней</p>
+    <div class="pony-picker" id="ponyPicker"></div>
   </section>
 
   <!-- Уход за пони -->
