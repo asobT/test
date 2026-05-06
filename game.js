@@ -1,5 +1,116 @@
 // === Волшебные Пони — игра для детей 4-8 лет ===
 
+// ---------- Звук (Web Audio synth) ----------
+const Sound = (() => {
+  let ctx = null;
+  let muted = false;
+  try { muted = localStorage.getItem('ponyMute') === '1'; } catch (e) {}
+
+  function getCtx() {
+    if (!ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) ctx = new AC();
+    }
+    if (ctx && ctx.state === 'suspended') ctx.resume();
+    return ctx;
+  }
+
+  // Один тон с ADSR-конвертом
+  function tone({ freq = 440, dur = 0.15, type = 'sine', vol = 0.2, attack = 0.01, release = 0.05 }) {
+    const c = getCtx(); if (!c) return;
+    const t0 = c.currentTime;
+    const osc = c.createOscillator();
+    const gain = c.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, t0);
+    gain.gain.setValueAtTime(0, t0);
+    gain.gain.linearRampToValueAtTime(vol, t0 + attack);
+    gain.gain.linearRampToValueAtTime(0, t0 + dur + release);
+    osc.connect(gain).connect(c.destination);
+    osc.start(t0);
+    osc.stop(t0 + dur + release + 0.05);
+  }
+
+  // Свип частоты
+  function sweep(fromF, toF, dur = 0.2, type = 'sine', vol = 0.2) {
+    const c = getCtx(); if (!c) return;
+    const t0 = c.currentTime;
+    const osc = c.createOscillator();
+    const gain = c.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(fromF, t0);
+    osc.frequency.exponentialRampToValueAtTime(Math.max(20, toF), t0 + dur);
+    gain.gain.setValueAtTime(0, t0);
+    gain.gain.linearRampToValueAtTime(vol, t0 + 0.01);
+    gain.gain.linearRampToValueAtTime(0, t0 + dur);
+    osc.connect(gain).connect(c.destination);
+    osc.start(t0); osc.stop(t0 + dur + 0.05);
+  }
+
+  // Арпеджио
+  function arp(freqs, step = 0.07, vol = 0.25, type = 'triangle') {
+    const c = getCtx(); if (!c) return;
+    freqs.forEach((f, i) => {
+      setTimeout(() => tone({ freq: f, dur: step * 1.2, type, vol }), i * step * 1000);
+    });
+  }
+
+  // Шумовой "пуф" — для воды/облаков
+  function noise(dur = 0.3, vol = 0.15) {
+    const c = getCtx(); if (!c) return;
+    const buf = c.createBuffer(1, c.sampleRate * dur, c.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / data.length, 2);
+    }
+    const src = c.createBufferSource();
+    src.buffer = buf;
+    const filter = c.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 1200;
+    const gain = c.createGain();
+    gain.gain.value = vol;
+    src.connect(filter).connect(gain).connect(c.destination);
+    src.start();
+  }
+
+  const sounds = {
+    click:    () => tone({ freq: 660, dur: 0.04, type: 'square', vol: 0.12 }),
+    back:     () => sweep(660, 330, 0.1, 'square', 0.12),
+    feed:     () => arp([523, 659], 0.07, 0.25),
+    wash:     () => { noise(0.4, 0.12); sweep(900, 300, 0.4, 'sine', 0.1); },
+    brush:    () => arp([784, 880, 988], 0.05, 0.18, 'sine'),
+    play:     () => arp([523, 784, 1047], 0.08, 0.25),
+    sleep:    () => sweep(330, 165, 0.6, 'sine', 0.18),
+    hug:      () => arp([392, 523, 659, 784], 0.09, 0.28),
+    star:     () => arp([784, 988, 1175], 0.05, 0.22),
+    apple:    () => tone({ freq: 523, dur: 0.1, type: 'triangle', vol: 0.25 }),
+    cloud:    () => tone({ freq: 220, dur: 0.18, type: 'sine', vol: 0.15 }),
+    jump:     () => sweep(330, 880, 0.18, 'square', 0.18),
+    hit:      () => { tone({ freq: 110, dur: 0.18, type: 'sawtooth', vol: 0.25 }); noise(0.15, 0.1); },
+    flip:     () => tone({ freq: 880, dur: 0.04, type: 'square', vol: 0.12 }),
+    match:    () => arp([523, 659, 784, 1047], 0.06, 0.3),
+    noMatch:  () => sweep(300, 200, 0.2, 'square', 0.18),
+    win:      () => arp([523, 659, 784, 1047, 1319, 1568], 0.08, 0.32),
+    lose:     () => arp([440, 392, 330, 262], 0.12, 0.25, 'sawtooth'),
+    correct:  () => arp([659, 784, 988], 0.07, 0.3),
+    wrong:    () => sweep(440, 200, 0.3, 'square', 0.18)
+  };
+
+  return {
+    play(name) {
+      if (muted) return;
+      const fn = sounds[name];
+      if (fn) try { fn(); } catch (e) {}
+    },
+    isMuted() { return muted; },
+    setMuted(v) {
+      muted = !!v;
+      try { localStorage.setItem('ponyMute', muted ? '1' : '0'); } catch (e) {}
+    }
+  };
+})();
+
 // ---------- Утилиты ----------
 const $ = (id) => document.getElementById(id);
 const rand = (a, b) => Math.random() * (b - a) + a;
@@ -207,8 +318,27 @@ function showScreen(name) {
   if (name === 'arcMemory') resetMemoryOverlay();
 }
 document.querySelectorAll('[data-go]').forEach(b => {
-  b.addEventListener('click', () => showScreen(b.dataset.go));
+  b.addEventListener('click', () => {
+    Sound.play(b.classList.contains('back-btn') ? 'back' : 'click');
+    showScreen(b.dataset.go);
+  });
 });
+
+// Кнопка отключения звука
+(function initMuteBtn() {
+  const btn = $('muteBtn');
+  if (!btn) return;
+  const sync = () => {
+    btn.textContent = Sound.isMuted() ? '🔇' : '🔊';
+    btn.classList.toggle('muted', Sound.isMuted());
+  };
+  sync();
+  btn.addEventListener('click', () => {
+    Sound.setMuted(!Sound.isMuted());
+    sync();
+    if (!Sound.isMuted()) Sound.play('click');
+  });
+})();
 
 // ---------- Бейджи на меню ----------
 function updateMenuBadges() {
@@ -465,6 +595,7 @@ function ponyAnim(cls) {
 
 const careActions = {
   feed: () => {
+    Sound.play('feed');
     save.pony.food = clamp(save.pony.food + 25, 0, 100);
     save.pony.happy = clamp(save.pony.happy + 5, 0, 100);
     spawnHearts('🍎', 4);
@@ -472,6 +603,7 @@ const careActions = {
     ponyAnim('pony-bounce');
   },
   wash: () => {
+    Sound.play('wash');
     save.pony.clean = clamp(save.pony.clean + 30, 0, 100);
     save.pony.happy = clamp(save.pony.happy + 5, 0, 100);
     ponyTransient.washing = true;
@@ -481,6 +613,7 @@ const careActions = {
     setTimeout(() => { ponyTransient.washing = false; renderPony(); }, 1500);
   },
   brush: () => {
+    Sound.play('brush');
     save.pony.clean = clamp(save.pony.clean + 10, 0, 100);
     save.pony.happy = clamp(save.pony.happy + 15, 0, 100);
     spawnHearts('✨', 5);
@@ -488,6 +621,7 @@ const careActions = {
     ponyAnim('pony-bounce');
   },
   play: () => {
+    Sound.play('play');
     save.pony.happy = clamp(save.pony.happy + 25, 0, 100);
     save.pony.sleep = clamp(save.pony.sleep - 8, 0, 100);
     save.pony.food = clamp(save.pony.food - 5, 0, 100);
@@ -496,6 +630,7 @@ const careActions = {
     ponyAnim('pony-bounce');
   },
   sleep: () => {
+    Sound.play('sleep');
     save.pony.sleep = clamp(save.pony.sleep + 35, 0, 100);
     save.pony.happy = clamp(save.pony.happy + 5, 0, 100);
     ponyTransient.sleeping = true;
@@ -505,6 +640,7 @@ const careActions = {
     setTimeout(() => { ponyTransient.sleeping = false; renderPony(); }, 2000);
   },
   hug: () => {
+    Sound.play('hug');
     save.pony.happy = clamp(save.pony.happy + 30, 0, 100);
     spawnHearts('💖', 8);
     showEmote('🥰');
@@ -876,12 +1012,15 @@ function arcadeLoop() {
     const dx = px - it.x, dy = py - it.y;
     if (Math.sqrt(dx * dx + dy * dy) < arcade.pony.w / 2 + it.r - 8) {
       if (it.type === 'star') {
+        Sound.play('star');
         arcade.score += 2;
         arcade.floats.push({ x: it.x, y: it.y, text: '+2', color: '#ffce4d', life: 60 });
       } else if (it.type === 'apple') {
+        Sound.play('apple');
         arcade.score += 1;
         arcade.floats.push({ x: it.x, y: it.y, text: '+1', color: '#ff6e6e', life: 60 });
       } else {
+        Sound.play('cloud');
         arcade.score = Math.max(0, arcade.score - 1);
         arcade.floats.push({ x: it.x, y: it.y, text: 'хи!', color: '#a8a8a8', life: 60 });
       }
@@ -918,12 +1057,15 @@ function arcadeLoop() {
 
 function endArcade() {
   arcade.running = false;
-  if (arcade.score > (save.best.catch || 0)) {
+  const best = save.best.catch || 0;
+  if (arcade.score > best) {
+    Sound.play('win');
     save.best.catch = arcade.score;
     save.pony.happy = clamp(save.pony.happy + 10, 0, 100);
     saveAll();
     $('overlayTitle').textContent = 'Новый рекорд! 🌟';
   } else {
+    Sound.play(arcade.score > 0 ? 'correct' : 'lose');
     $('overlayTitle').textContent = 'Молодец! 🌟';
   }
   $('overlayText').textContent = `Ты собрал ${arcade.score} очков. Лучший: ${save.best.catch}.`;
@@ -1080,6 +1222,7 @@ function runLoop() {
 
   // Прыжок
   if (runner.jumpRequest && runner.pony.onGround) {
+    Sound.play('jump');
     runner.pony.vy = -12;
     runner.pony.onGround = false;
   }
@@ -1115,6 +1258,7 @@ function runLoop() {
       runner.pony.x + runner.pony.w - 10 > o.x &&
       runner.pony.y + runner.pony.h - 6 > o.y
     ) {
+      Sound.play('hit');
       runner.lives--;
       $('runLives').textContent = Math.max(0, runner.lives);
       runner.obstacles.splice(i, 1);
@@ -1136,6 +1280,7 @@ function runLoop() {
     const px = runner.pony.x + runner.pony.w / 2;
     const py = runner.pony.y + runner.pony.h / 2;
     if (Math.hypot(px - s.x, py - s.y) < runner.pony.w / 2 + s.r - 6) {
+      Sound.play('star');
       runner.stars.splice(i, 1);
       runner.score += 2;
       $('runScore').textContent = runner.score;
@@ -1160,11 +1305,13 @@ function runLoop() {
 function endRun() {
   runner.running = false;
   if (runner.score > (save.best.run || 0)) {
+    Sound.play('win');
     save.best.run = runner.score;
     save.pony.happy = clamp(save.pony.happy + 10, 0, 100);
     saveAll();
     $('runTitle').textContent = 'Новый рекорд! 🌈';
   } else {
+    Sound.play(runner.score > 0 ? 'correct' : 'lose');
     $('runTitle').textContent = 'Молодец! 🌈';
   }
   $('runText').textContent = `Ты собрал ${runner.score} очков. Лучший: ${save.best.run}.`;
@@ -1251,6 +1398,7 @@ function onMemoryClick(card) {
   if (memory.busy) return;
   if (card.classList.contains('flipped')) return;
   if (card.classList.contains('matched')) return;
+  Sound.play('flip');
   card.classList.add('flipped');
   memory.flipped.push(card);
   if (memory.flipped.length === 2) {
@@ -1260,6 +1408,7 @@ function onMemoryClick(card) {
     if (a.dataset.name === b.dataset.name) {
       memory.busy = true;
       setTimeout(() => {
+        Sound.play('match');
         a.classList.add('matched');
         b.classList.add('matched');
         memory.flipped = [];
@@ -1271,6 +1420,7 @@ function onMemoryClick(card) {
     } else {
       memory.busy = true;
       setTimeout(() => {
+        Sound.play('noMatch');
         a.classList.remove('flipped');
         b.classList.remove('flipped');
         memory.flipped = [];
@@ -1284,11 +1434,13 @@ function endMemory() {
   memory.running = false;
   const isBest = save.best.memory == null || memory.moves < save.best.memory;
   if (isBest) {
+    Sound.play('win');
     save.best.memory = memory.moves;
     save.pony.happy = clamp(save.pony.happy + 10, 0, 100);
     saveAll();
     $('memTitle').textContent = 'Новый рекорд! 🧠';
   } else {
+    Sound.play('correct');
     $('memTitle').textContent = 'Молодец! 🧠';
   }
   $('memText').textContent = `Ты нашёл все пары за ${memory.moves} ходов. Лучший: ${save.best.memory}.`;
@@ -1390,6 +1542,7 @@ function nextManners() {
     b.className = 'choice-btn';
     b.textContent = ch.text;
     b.addEventListener('click', () => {
+      Sound.play(ch.correct ? 'correct' : 'wrong');
       box.querySelectorAll('button').forEach(x => x.disabled = true);
       b.classList.add(ch.correct ? 'correct' : 'wrong');
       $('mannersFeedback').textContent = ch.reply;

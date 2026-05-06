@@ -310,6 +310,24 @@ html, body {
 }
 
 /* === Общие элементы === */
+.mute-btn {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  width: 44px;
+  height: 44px;
+  border: 3px solid #fff;
+  background: #b07cff;
+  color: #fff;
+  font-size: 20px;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,.2);
+  z-index: 100;
+  font-family: inherit;
+}
+.mute-btn.muted { background: #c0c0c0; opacity: .8; }
+
 .back-btn {
   position: absolute;
   top: 14px; left: 14px;
