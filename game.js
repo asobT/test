@@ -198,6 +198,33 @@ const PONIES = [
     eye: '#5d3fb3',
     horn: true, wings: true,
     cutie: 'moon'
+  },
+  {
+    id: 'pinkie',
+    name: 'Пинки',
+    trait: 'праздничная',
+    kind: 'image',
+    poses: [
+      'assets/pinkie/pinkie%20(1).svg',
+      'assets/pinkie/pinkie%20(2).svg',
+      'assets/pinkie/pinkie%20(3).svg',
+      'assets/pinkie/pinkie%20(4).svg',
+      'assets/pinkie/pinkie%20(5).svg',
+      'assets/pinkie/pinkie%20(6).svg',
+      'assets/pinkie/pinkie%20(7).svg',
+      'assets/pinkie/pinkie%20(8).svg',
+      'assets/pinkie/pinkie%20(9).svg',
+      'assets/pinkie/pinkie%20(10).svg'
+    ],
+    // Цвета используются в canvas-аркадах и для рамок мемори
+    body: '#ffd6f5',
+    bodyStroke: '#ff6ec7',
+    mane: '#ff6ec7',
+    maneAccent: '#ff9ad6',
+    tail: '#ff6ec7',
+    eye: '#3b8fd1',
+    horn: false, wings: false,
+    cutie: 'flower'
   }
 ];
 const ponyById = (id) => PONIES.find(p => p.id === id) || PONIES[0];
@@ -304,6 +331,8 @@ function saveAll() {
 
 // ---------- Навигация ----------
 function showScreen(name) {
+  // Остановить любую речь при переходе со страницы уроков
+  if (typeof Speech !== 'undefined') Speech.cancel();
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   const el = document.getElementById(name);
   if (el) el.classList.add('active');
@@ -336,7 +365,11 @@ document.querySelectorAll('[data-go]').forEach(b => {
   btn.addEventListener('click', () => {
     Sound.setMuted(!Sound.isMuted());
     sync();
-    if (!Sound.isMuted()) Sound.play('click');
+    if (Sound.isMuted()) {
+      if (typeof Speech !== 'undefined') Speech.cancel();
+    } else {
+      Sound.play('click');
+    }
   });
 })();
 
@@ -508,10 +541,39 @@ function ponySVGMarkup(p, state = {}) {
 
 const ponyTransient = { washing: false, sleeping: false };
 
-function renderPony() {
+// Для image-пони — мапим действие в индекс позы (0..N-1)
+const PINKIE_POSE_BY_ACTION = {
+  idle: 0, feed: 1, wash: 2, brush: 3, play: 4,
+  sleep: 5, hug: 6, happy: 7, sad: 8, dance: 9
+};
+
+function pickPoseIndex(p, state, override) {
+  const N = (p.poses || []).length || 1;
+  if (override != null) return override % N;
+  if (state.sleeping) return PINKIE_POSE_BY_ACTION.sleep % N;
+  if (state.washing) return PINKIE_POSE_BY_ACTION.wash % N;
+  if ((state.happy ?? 80) < 30) return PINKIE_POSE_BY_ACTION.sad % N;
+  if ((state.happy ?? 80) > 70) return PINKIE_POSE_BY_ACTION.happy % N;
+  return 0;
+}
+
+function ponyImageMarkup(p, state, override) {
+  const idx = pickPoseIndex(p, state, override);
+  const src = p.poses[idx];
+  return `
+    <image href="${src}" xlink:href="${src}" x="40" y="-10" width="320" height="340"
+           preserveAspectRatio="xMidYMax meet"/>
+  `;
+}
+
+function renderPony(actionOverride) {
   const p = ponyById(save.selectedPonyId);
   const state = Object.assign({}, save.pony, ponyTransient);
-  $('ponySVG').innerHTML = ponySVGMarkup(p, state);
+  if (p.kind === 'image') {
+    $('ponySVG').innerHTML = ponyImageMarkup(p, state, actionOverride);
+  } else {
+    $('ponySVG').innerHTML = ponySVGMarkup(p, state);
+  }
   $('ponyName').textContent = p.name;
   $('meterFood').style.width = save.pony.food + '%';
   $('meterClean').style.width = save.pony.clean + '%';
@@ -549,9 +611,12 @@ function renderPonyPicker() {
     card.className = 'pony-card';
     if (p.id === save.selectedPonyId) card.classList.add('selected');
     // Маленький превью SVG — здоровая пони
+    const previewMarkup = p.kind === 'image'
+      ? ponyImageMarkup(p, { happy: 80, food: 80, clean: 80, sleep: 80 }, 0)
+      : ponySVGMarkup(p, { happy: 80, food: 80, clean: 80, sleep: 80 });
     card.innerHTML = `
       <svg viewBox="0 0 400 320" xmlns="http://www.w3.org/2000/svg">
-        ${ponySVGMarkup(p, { happy: 80, food: 80, clean: 80, sleep: 80 })}
+        ${previewMarkup}
       </svg>
       <div class="pony-name">${p.name}</div>
       <div class="pony-trait">${p.trait}</div>
@@ -652,8 +717,14 @@ document.querySelectorAll('.action-btn').forEach(b => {
   b.addEventListener('click', () => {
     const a = b.dataset.action;
     careActions[a]();
-    renderPony();
+    // Для image-пони показываем соответствующую позу на 1.5 секунды
+    const overrideIdx = PINKIE_POSE_BY_ACTION[a];
+    renderPony(overrideIdx);
     saveAll();
+    if (overrideIdx != null) {
+      clearTimeout(renderPony._poseT);
+      renderPony._poseT = setTimeout(() => renderPony(), 1800);
+    }
   });
 });
 
@@ -1378,9 +1449,10 @@ function startMemory() {
     card.dataset.name = item.name;
     let backInner;
     if (item.kind === 'pony') {
-      backInner = `<svg viewBox="0 0 400 320" xmlns="http://www.w3.org/2000/svg">
-        ${ponySVGMarkup(item.pony, { happy: 80, food: 80, clean: 80, sleep: 80 })}
-      </svg>`;
+      const inner = item.pony.kind === 'image'
+        ? ponyImageMarkup(item.pony, { happy: 80, food: 80, clean: 80, sleep: 80 }, 0)
+        : ponySVGMarkup(item.pony, { happy: 80, food: 80, clean: 80, sleep: 80 });
+      backInner = `<svg viewBox="0 0 400 320" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
     } else {
       backInner = `<img src="${TWEMOJI(item.emoji)}" alt="">`;
     }
@@ -1447,6 +1519,49 @@ function endMemory() {
   $('memBest').textContent = save.best.memory;
   $('memoryOverlay').classList.remove('hidden');
 }
+
+// ---------- Озвучка (TTS) ----------
+const Speech = (() => {
+  const supported = 'speechSynthesis' in window;
+  let voice = null;
+
+  function pickVoice() {
+    if (!supported) return null;
+    const voices = speechSynthesis.getVoices();
+    // Ищем русский голос; приоритет — женский
+    const ru = voices.filter(v => /ru/i.test(v.lang));
+    voice = ru.find(v => /female|жен|alyona|milena|katya|tatyana/i.test(v.name))
+         || ru[0]
+         || voices.find(v => /^en/i.test(v.lang))
+         || voices[0]
+         || null;
+  }
+  if (supported) {
+    pickVoice();
+    speechSynthesis.onvoiceschanged = pickVoice;
+  }
+
+  function speak(text, opts = {}) {
+    return new Promise((resolve) => {
+      if (!supported || Sound.isMuted() || !text) { resolve(); return; }
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'ru-RU';
+      u.rate = opts.rate ?? 0.95;
+      u.pitch = opts.pitch ?? 1.15;
+      u.volume = opts.volume ?? 1;
+      if (voice) u.voice = voice;
+      u.onend = () => resolve();
+      u.onerror = () => resolve();
+      speechSynthesis.speak(u);
+    });
+  }
+
+  function cancel() {
+    if (supported) speechSynthesis.cancel();
+  }
+
+  return { speak, cancel, supported };
+})();
 
 // ---------- УРОКИ ДОБРОТЫ ----------
 const situations = [
@@ -1525,9 +1640,31 @@ const situations = [
 ];
 
 let mannersIndex = -1;
+let mannersAnswered = false;
+
+async function readSituation(text, buttons) {
+  // Читаем текст ситуации с подсветкой
+  Speech.cancel();
+  const textEl = $('situationText');
+  textEl.classList.add('speaking');
+  await Speech.speak(text, { rate: 0.95 });
+  textEl.classList.remove('speaking');
+  if (mannersAnswered) return;
+  // По очереди читаем варианты с подсветкой каждого
+  for (const btn of buttons) {
+    if (mannersAnswered) break;
+    btn.classList.add('speaking');
+    await Speech.speak(btn.dataset.read || btn.textContent, { rate: 0.95 });
+    btn.classList.remove('speaking');
+    await new Promise(r => setTimeout(r, 150));
+  }
+}
 
 function nextManners() {
+  Speech.cancel();
+  mannersAnswered = false;
   $('mannersFeedback').textContent = '';
+  $('mannersFeedback').classList.remove('speaking');
   let next;
   do { next = Math.floor(Math.random() * situations.length); } while (next === mannersIndex && situations.length > 1);
   mannersIndex = next;
@@ -1537,13 +1674,19 @@ function nextManners() {
   const box = $('situationChoices');
   box.innerHTML = '';
   const shuffled = [...s.choices].sort(() => Math.random() - 0.5);
-  shuffled.forEach(ch => {
+  const buttons = shuffled.map((ch, idx) => {
     const b = document.createElement('button');
     b.className = 'choice-btn';
     b.textContent = ch.text;
-    b.addEventListener('click', () => {
+    b.dataset.read = `Вариант ${idx + 1}: ${ch.text}`;
+    b.addEventListener('click', async () => {
+      mannersAnswered = true;
+      Speech.cancel();
       Sound.play(ch.correct ? 'correct' : 'wrong');
-      box.querySelectorAll('button').forEach(x => x.disabled = true);
+      box.querySelectorAll('button').forEach(x => {
+        x.disabled = true;
+        x.classList.remove('speaking');
+      });
       b.classList.add(ch.correct ? 'correct' : 'wrong');
       $('mannersFeedback').textContent = ch.reply;
       save.manners.total++;
@@ -1552,10 +1695,18 @@ function nextManners() {
         save.pony.happy = clamp(save.pony.happy + 5, 0, 100);
       }
       saveAll();
-      setTimeout(nextManners, 2500);
+      // Озвучиваем ответ
+      const fb = $('mannersFeedback');
+      fb.classList.add('speaking');
+      await Speech.speak(ch.reply, { rate: 0.95 });
+      fb.classList.remove('speaking');
+      setTimeout(nextManners, 1200);
     });
     box.appendChild(b);
+    return b;
   });
+  // Читаем после короткой паузы, чтобы DOM успел отрендериться
+  setTimeout(() => readSituation(s.text, buttons), 200);
 }
 
 // ---------- Старт ----------
