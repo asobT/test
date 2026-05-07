@@ -685,6 +685,37 @@ html, body {
 .choice-btn.correct { background: linear-gradient(135deg, #6ed47a, #a8e6b1); box-shadow: 0 3px 0 #4caf50; }
 .choice-btn.wrong { background: linear-gradient(135deg, #ff8a80, #ffb3a8); box-shadow: 0 3px 0 #d84040; }
 
+/* Подсветка читаемого текста / варианта */
+.speaking {
+  animation: speakingPulse 1.4s ease-in-out infinite;
+  position: relative;
+  z-index: 1;
+}
+.situation-text.speaking {
+  background: linear-gradient(90deg, #ffe066, #ffce4d);
+  border-radius: 14px;
+  padding: 8px 12px;
+  box-shadow: 0 0 0 4px #ffce4d;
+  color: #6b3a8a;
+}
+.choice-btn.speaking {
+  background: linear-gradient(135deg, #ffce4d, #ffe066) !important;
+  color: #6b3a8a !important;
+  box-shadow: 0 3px 0 #c89b00, 0 0 0 4px #ffe066 !important;
+  text-shadow: none !important;
+  transform: scale(1.04);
+}
+.manners-feedback.speaking {
+  background: linear-gradient(90deg, #d9a7ff, #b07cff);
+  color: #fff;
+  border-radius: 12px;
+  padding: 6px 12px;
+}
+@keyframes speakingPulse {
+  0%, 100% { filter: brightness(1); }
+  50%      { filter: brightness(1.15); }
+}
+
 .manners-feedback {
   font-size: 22px;
   font-weight: bold;
