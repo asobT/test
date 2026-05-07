@@ -123,8 +123,8 @@ const TWEMOJI = (hex) => `https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/ass
 const PONIES = [
   {
     id: 'sparkle',
-    name: 'Искорка',
-    trait: 'волшебница',
+    name: 'Іскорка',
+    trait: 'чарівниця',
     body: '#e9d6ff',
     bodyStroke: '#7a4dc7',
     mane: '#6b3a8a',
@@ -136,8 +136,8 @@ const PONIES = [
   },
   {
     id: 'rainbow',
-    name: 'Радуга',
-    trait: 'быстрая',
+    name: 'Веселка',
+    trait: 'швидка',
     body: '#cfeaff',
     bodyStroke: '#3b8fd1',
     mane: '#ff6e6e',
@@ -149,8 +149,8 @@ const PONIES = [
   },
   {
     id: 'flower',
-    name: 'Цветочек',
-    trait: 'добрая',
+    name: 'Квіточка',
+    trait: 'добра',
     body: '#ffe7b3',
     bodyStroke: '#c08a2e',
     mane: '#ff9ad6',
@@ -162,8 +162,8 @@ const PONIES = [
   },
   {
     id: 'pearl',
-    name: 'Жемчужинка',
-    trait: 'модница',
+    name: 'Перлинка',
+    trait: 'модниця',
     body: '#ffffff',
     bodyStroke: '#7c5fbf',
     mane: '#7c5fbf',
@@ -175,8 +175,8 @@ const PONIES = [
   },
   {
     id: 'sunny',
-    name: 'Лучик',
-    trait: 'весёлая',
+    name: 'Промінчик',
+    trait: 'весела',
     body: '#ffd9a8',
     bodyStroke: '#c47628',
     mane: '#ff8a40',
@@ -188,8 +188,8 @@ const PONIES = [
   },
   {
     id: 'midnight',
-    name: 'Полночь',
-    trait: 'мечтательная',
+    name: 'Опівніч',
+    trait: 'мрійниця',
     body: '#cdb8ff',
     bodyStroke: '#3a2570',
     mane: '#3a2570',
@@ -201,8 +201,8 @@ const PONIES = [
   },
   {
     id: 'pinkie',
-    name: 'Пинки',
-    trait: 'праздничная',
+    name: 'Пінкі',
+    trait: 'святкова',
     kind: 'image',
     poses: [
       'assets/pinkie/pinkie%20(1).svg',
@@ -378,11 +378,11 @@ function updateMenuBadges() {
   const box = $('menuBadges');
   box.innerHTML = '';
   const items = [];
-  if (save.best.catch > 0) items.push({ icon: '2b50', text: `Звёзды: ${save.best.catch}` });
-  if (save.best.run > 0) items.push({ icon: '1f308', text: `Радуга: ${save.best.run}` });
-  if (save.best.memory != null) items.push({ icon: '1f9e0', text: `Память: ${save.best.memory} ходов` });
+  if (save.best.catch > 0) items.push({ icon: '2b50', text: `Зірки: ${save.best.catch}` });
+  if (save.best.run > 0) items.push({ icon: '1f308', text: `Веселка: ${save.best.run}` });
+  if (save.best.memory != null) items.push({ icon: '1f9e0', text: `Пам'ять: ${save.best.memory} ходів` });
   if (save.manners.correct > 0) items.push({ icon: '1f496', text: `Доброта: ${save.manners.correct}` });
-  if (save.visits > 1) items.push({ icon: '1f984', text: `Визитов: ${save.visits}` });
+  if (save.visits > 1) items.push({ icon: '1f984', text: `Відвідин: ${save.visits}` });
   items.forEach(it => {
     const b = document.createElement('div');
     b.className = 'badge';
@@ -878,8 +878,8 @@ function resetCatchOverlay() {
   $('arcScore').textContent = 0;
   $('arcLives').textContent = 3;
   $('arcBest').textContent = save.best.catch || 0;
-  $('overlayTitle').textContent = 'Лови звёздочки!';
-  $('overlayText').textContent = 'Двигай пони и собирай звёзды и яблочки. Тучек не бойся — они просто щекочут!';
+  $('overlayTitle').textContent = 'Лови зірочки!';
+  $('overlayText').textContent = 'Рухай поні й збирай зірочки та яблучка. Хмаринок не бійся — вони лоскочуть!';
   $('arcadeOverlay').classList.remove('hidden');
 }
 
@@ -1134,12 +1134,12 @@ function endArcade() {
     save.best.catch = arcade.score;
     save.pony.happy = clamp(save.pony.happy + 10, 0, 100);
     saveAll();
-    $('overlayTitle').textContent = 'Новый рекорд! 🌟';
+    $('overlayTitle').textContent = 'Новий рекорд! 🌟';
   } else {
     Sound.play(arcade.score > 0 ? 'correct' : 'lose');
-    $('overlayTitle').textContent = 'Молодец! 🌟';
+    $('overlayTitle').textContent = 'Молодець! 🌟';
   }
-  $('overlayText').textContent = `Ты собрал ${arcade.score} очков. Лучший: ${save.best.catch}.`;
+  $('overlayText').textContent = `Ти зібрав ${arcade.score} очок. Найкращий: ${save.best.catch}.`;
   $('arcBest').textContent = save.best.catch;
   $('arcadeOverlay').classList.remove('hidden');
 }
@@ -1203,8 +1203,8 @@ function resetRunOverlay() {
   $('runScore').textContent = 0;
   $('runLives').textContent = 3;
   $('runBest').textContent = save.best.run || 0;
-  $('runTitle').textContent = 'Скачи по радуге!';
-  $('runText').textContent = 'Нажимай «Прыг!», чтобы перепрыгивать камушки. Лови звёздочки в воздухе!';
+  $('runTitle').textContent = 'Стрибай по веселці!';
+  $('runText').textContent = 'Натискай «Стриб!», щоб перестрибувати камінці. Лови зірочки в повітрі!';
   $('runOverlay').classList.remove('hidden');
 }
 
@@ -1380,12 +1380,12 @@ function endRun() {
     save.best.run = runner.score;
     save.pony.happy = clamp(save.pony.happy + 10, 0, 100);
     saveAll();
-    $('runTitle').textContent = 'Новый рекорд! 🌈';
+    $('runTitle').textContent = 'Новий рекорд! 🌈';
   } else {
     Sound.play(runner.score > 0 ? 'correct' : 'lose');
-    $('runTitle').textContent = 'Молодец! 🌈';
+    $('runTitle').textContent = 'Молодець! 🌈';
   }
-  $('runText').textContent = `Ты собрал ${runner.score} очков. Лучший: ${save.best.run}.`;
+  $('runText').textContent = `Ти зібрав ${runner.score} очок. Найкращий: ${save.best.run}.`;
   $('runBest').textContent = save.best.run;
   $('runOverlay').classList.remove('hidden');
 }
@@ -1413,8 +1413,8 @@ function resetMemoryOverlay() {
   $('memMoves').textContent = 0;
   $('memFound').textContent = 0;
   $('memBest').textContent = save.best.memory != null ? save.best.memory : '∞';
-  $('memTitle').textContent = 'Найди пару!';
-  $('memText').textContent = 'Открывай карточки и находи одинаковых пони. Постарайся за меньшее число ходов!';
+  $('memTitle').textContent = 'Знайди пару!';
+  $('memText').textContent = 'Відкривай картки й знаходь однакових поні. Намагайся зробити менше ходів!';
   $('memoryOverlay').classList.remove('hidden');
   $('memoryGrid').innerHTML = '';
 }
@@ -1510,12 +1510,12 @@ function endMemory() {
     save.best.memory = memory.moves;
     save.pony.happy = clamp(save.pony.happy + 10, 0, 100);
     saveAll();
-    $('memTitle').textContent = 'Новый рекорд! 🧠';
+    $('memTitle').textContent = 'Новий рекорд! 🧠';
   } else {
     Sound.play('correct');
-    $('memTitle').textContent = 'Молодец! 🧠';
+    $('memTitle').textContent = 'Молодець! 🧠';
   }
-  $('memText').textContent = `Ты нашёл все пары за ${memory.moves} ходов. Лучший: ${save.best.memory}.`;
+  $('memText').textContent = `Ти знайшов усі пари за ${memory.moves} ходів. Найкращий: ${save.best.memory}.`;
   $('memBest').textContent = save.best.memory;
   $('memoryOverlay').classList.remove('hidden');
 }
@@ -1528,11 +1528,13 @@ const Speech = (() => {
   function pickVoice() {
     if (!supported) return null;
     const voices = speechSynthesis.getVoices();
-    // Ищем русский голос; приоритет — женский
-    const ru = voices.filter(v => /ru/i.test(v.lang));
-    voice = ru.find(v => /female|жен|alyona|milena|katya|tatyana/i.test(v.name))
+    // Шукаємо український голос; пріоритет — жіночий, далі російський, далі будь-який
+    const uk = voices.filter(v => /^uk/i.test(v.lang));
+    const ru = voices.filter(v => /^ru/i.test(v.lang));
+    voice = uk.find(v => /female|жін|polina|natalia|svetlana|olena/i.test(v.name))
+         || uk[0]
+         || ru.find(v => /female|жен|alyona|milena|katya|tatyana/i.test(v.name))
          || ru[0]
-         || voices.find(v => /^en/i.test(v.lang))
          || voices[0]
          || null;
   }
@@ -1545,7 +1547,7 @@ const Speech = (() => {
     return new Promise((resolve) => {
       if (!supported || Sound.isMuted() || !text) { resolve(); return; }
       const u = new SpeechSynthesisUtterance(text);
-      u.lang = 'ru-RU';
+      u.lang = (voice && voice.lang) || 'uk-UA';
       u.rate = opts.rate ?? 0.95;
       u.pitch = opts.pitch ?? 1.15;
       u.volume = opts.volume ?? 1;
@@ -1563,78 +1565,78 @@ const Speech = (() => {
   return { speak, cancel, supported };
 })();
 
-// ---------- УРОКИ ДОБРОТЫ ----------
+// ---------- УРОКИ ДОБРОТИ ----------
 const situations = [
   {
     emoji: '🎁',
-    text: 'Подружка-пони подарила тебе цветочек. Что ты скажешь?',
+    text: 'Подружка-поні подарувала тобі квіточку. Що ти скажеш?',
     choices: [
-      { text: 'Спасибо большое!', correct: true, reply: 'Молодец! Говорить спасибо — это вежливо! 💖' },
-      { text: 'Дай ещё!', correct: false, reply: 'Лучше сказать «спасибо» — это так приятно слышать.' },
-      { text: 'Ничего не скажу', correct: false, reply: 'Когда дарят подарок, обязательно благодарят! 🌸' }
+      { text: 'Дуже дякую!', correct: true, reply: 'Молодець! Дякувати — це ввічливо! 💖' },
+      { text: 'Дай ще!', correct: false, reply: 'Краще сказати «дякую» — це так приємно чути.' },
+      { text: 'Нічого не скажу', correct: false, reply: 'Коли дарують подарунок, обов\'язково дякують! 🌸' }
     ]
   },
   {
     emoji: '🍎',
-    text: 'У пони только одно яблочко, а вокруг друзья. Что делать?',
+    text: 'У поні лише одне яблучко, а навколо друзі. Що робити?',
     choices: [
-      { text: 'Поделиться с друзьями', correct: true, reply: 'Делиться — это здорово! Друзья тебя обнимут! 🤗' },
-      { text: 'Съесть всё одной', correct: false, reply: 'С друзьями всё вкуснее, если поделиться!' },
-      { text: 'Спрятать яблочко', correct: false, reply: 'Друзья расстроятся. Лучше поделиться!' }
+      { text: 'Поділитися з друзями', correct: true, reply: 'Ділитися — це чудово! Друзі тебе обіймуть! 🤗' },
+      { text: 'З\'їсти все самій', correct: false, reply: 'З друзями все смачніше, якщо поділитися!' },
+      { text: 'Сховати яблучко', correct: false, reply: 'Друзі засмутяться. Краще поділитися!' }
     ]
   },
   {
     emoji: '😢',
-    text: 'Маленькая пони упала и плачет. Как поступит добрая пони?',
+    text: 'Маленька поні впала й плаче. Як вчинить добра поні?',
     choices: [
-      { text: 'Помочь встать и обнять', correct: true, reply: 'Ты — настоящий друг! 💖' },
-      { text: 'Пройти мимо', correct: false, reply: 'Друзей нельзя оставлять в беде!' },
-      { text: 'Засмеяться', correct: false, reply: 'Над чужой бедой не смеются. Помоги!' }
+      { text: 'Допомогти встати й обійняти', correct: true, reply: 'Ти — справжній друг! 💖' },
+      { text: 'Пройти повз', correct: false, reply: 'Друзів не можна залишати в біді!' },
+      { text: 'Засміятися', correct: false, reply: 'З чужої біди не сміються. Допоможи!' }
     ]
   },
   {
     emoji: '🌙',
-    text: 'Уже поздно, пора спать. Что делает воспитанная пони?',
+    text: 'Вже пізно, час спати. Що робить вихована поні?',
     choices: [
-      { text: 'Чистит зубки и идёт в кроватку', correct: true, reply: 'Молодец! Здоровый сон — это важно! 😴' },
-      { text: 'Прыгает по кровати', correct: false, reply: 'На кровати нужно спать, а не прыгать!' },
-      { text: 'Громко кричит', correct: false, reply: 'Ночью все спят — нужно вести себя тихо.' }
+      { text: 'Чистить зубки й іде в ліжечко', correct: true, reply: 'Молодець! Здоровий сон — це важливо! 😴' },
+      { text: 'Стрибає по ліжку', correct: false, reply: 'У ліжку треба спати, а не стрибати!' },
+      { text: 'Голосно кричить', correct: false, reply: 'Вночі всі сплять — треба поводитися тихо.' }
     ]
   },
   {
     emoji: '🧸',
-    text: 'Поиграла с игрушками — что нужно сделать?',
+    text: 'Погралася з іграшками — що треба зробити?',
     choices: [
-      { text: 'Убрать на место', correct: true, reply: 'Отлично! Порядок — это красиво! ✨' },
-      { text: 'Оставить как есть', correct: false, reply: 'Игрушки нужно убирать — иначе на них наступят!' },
-      { text: 'Раскидать по всему дому', correct: false, reply: 'Так нельзя. Порядок — это уважение к дому.' }
+      { text: 'Прибрати на місце', correct: true, reply: 'Чудово! Порядок — це гарно! ✨' },
+      { text: 'Залишити як є', correct: false, reply: 'Іграшки треба прибирати — інакше на них наступлять!' },
+      { text: 'Розкидати по всій хаті', correct: false, reply: 'Так не можна. Порядок — це повага до дому.' }
     ]
   },
   {
     emoji: '🦄',
-    text: 'Новая пони пришла играть — она стесняется. Что сделать?',
+    text: 'Нова поні прийшла гратися — вона соромиться. Що зробити?',
     choices: [
-      { text: 'Поздороваться и улыбнуться', correct: true, reply: 'Ты подарил(а) тёплую улыбку! 💖' },
-      { text: 'Не замечать', correct: false, reply: 'Новым друзьям нужно немного внимания!' },
-      { text: 'Отвернуться', correct: false, reply: 'Лучше улыбнуться — друзей много не бывает!' }
+      { text: 'Привітатися й посміхнутися', correct: true, reply: 'Ти подарував(ла) теплу посмішку! 💖' },
+      { text: 'Не помічати', correct: false, reply: 'Новим друзям потрібно трохи уваги!' },
+      { text: 'Відвернутися', correct: false, reply: 'Краще посміхнутися — друзів багато не буває!' }
     ]
   },
   {
     emoji: '🥕',
-    text: 'Мама-пони приготовила обед. Что говорят перед едой?',
+    text: 'Мама-поні приготувала обід. Що кажуть перед їжею?',
     choices: [
-      { text: 'Спасибо за еду!', correct: true, reply: 'Какая воспитанная пони! 🌟' },
-      { text: 'Не хочу!', correct: false, reply: 'Мама старалась — стоит сказать «спасибо».' },
-      { text: 'Фу!', correct: false, reply: 'Так говорить обидно. Скажи лучше «спасибо»!' }
+      { text: 'Дякую за смачне!', correct: true, reply: 'Яка вихована поні! 🌟' },
+      { text: 'Не хочу!', correct: false, reply: 'Мама старалася — варто сказати «дякую».' },
+      { text: 'Фу!', correct: false, reply: 'Так казати образливо. Скажи краще «дякую»!' }
     ]
   },
   {
     emoji: '🪥',
-    text: 'Утро в пони-королевстве. Что делает воспитанная пони после сна?',
+    text: 'Ранок у поні-королівстві. Що робить вихована поні після сну?',
     choices: [
-      { text: 'Умывается и чистит зубки', correct: true, reply: 'Чистая пони — здоровая пони! ✨' },
-      { text: 'Сразу бежит играть', correct: false, reply: 'Сначала нужно умыться!' },
-      { text: 'Ничего не делает', correct: false, reply: 'Пони должна следить за собой каждое утро.' }
+      { text: 'Вмивається й чистить зубки', correct: true, reply: 'Чиста поні — здорова поні! ✨' },
+      { text: 'Одразу біжить гратися', correct: false, reply: 'Спершу треба вмитися!' },
+      { text: 'Нічого не робить', correct: false, reply: 'Поні має дбати про себе щоранку.' }
     ]
   }
 ];
@@ -1678,7 +1680,7 @@ function nextManners() {
     const b = document.createElement('button');
     b.className = 'choice-btn';
     b.textContent = ch.text;
-    b.dataset.read = `Вариант ${idx + 1}: ${ch.text}`;
+    b.dataset.read = `Варіант ${idx + 1}: ${ch.text}`;
     b.addEventListener('click', async () => {
       mannersAnswered = true;
       Speech.cancel();
